@@ -155,7 +155,7 @@ public class CalculatorGUI extends JFrame {
 //Calculation Function for GUI display(How GUI displays results and continuous calculation from result)
     private void calculate() {
         try {
-            String result = CalculatorEvaluator.evaluateExpression(currentInput.toString());
+            String result = CalculatorEvaluator.evaluateExpression(currentInput.toString()); //This line calls the CalculatorEvaluator.java class to handle the MATH
             history.add(currentInput.toString() + " = " + result);
             currentInput.setLength(0);
             currentInput.append(result);
