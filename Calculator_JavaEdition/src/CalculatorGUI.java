@@ -4,13 +4,12 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import javax.swing.Timer;
-import java.lang.Math;
 
 //Calculator Program to make GUI
-public class Calculator_Program extends JFrame {
+public class CalculatorGUI extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private JTextField displayField;
+    private static final long serialVersionUID = 1L;
+    private JTextField displayField;
     private StringBuilder currentInput;
     private ArrayList<String> history;
     private boolean cursorVisible;
@@ -19,7 +18,7 @@ public class Calculator_Program extends JFrame {
     private static final String AGREEMENT_KEY = "agreementAccepted";
 
     //GUI Settings
-    public Calculator_Program() {
+    public CalculatorGUI() {
         setTitle("CalC_JavaEdition™");
         setSize(300, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -33,7 +32,7 @@ public class Calculator_Program extends JFrame {
             }
         }
 
-   //Display and Buttons
+        //Display and Buttons
         displayField = new JTextField();
         displayField.setEditable(false);
         displayField.setHorizontalAlignment(JTextField.RIGHT);
@@ -150,14 +149,13 @@ public class Calculator_Program extends JFrame {
                 break;
             default:
                 insertAtCursor(buttonText);
-
         }
     }
 
-//Calculation Function
+//Calculation Function for GUI display(How GUI displays results and continuous calculation from result)
     private void calculate() {
         try {
-            String result = evaluateExpression(currentInput.toString());
+            String result = CalculatorEvaluator.evaluateExpression(currentInput.toString());
             history.add(currentInput.toString() + " = " + result);
             currentInput.setLength(0);
             currentInput.append(result);
@@ -165,14 +163,6 @@ public class Calculator_Program extends JFrame {
             updateDisplay();
         } catch (Exception ex) {
             displayField.setText("Error");
-        }
-    }
-
-    private String evaluateExpression(String expression) {
-        try {
-            return String.valueOf(eval(expression));
-        } catch (Exception e) {
-            return "Error";
         }
     }
 
@@ -263,7 +253,7 @@ public class Calculator_Program extends JFrame {
     }
 
     private static boolean showDisclaimer() {
-    	String agreementText = "TERMS OF USE AND DISCLAIMER\n\n" +
+        String agreementText = "TERMS OF USE AND DISCLAIMER\n\n" +
                 " 1. Agreement:\n    a. The use of CalC_JavaEdition™ is contingent upon your acceptance of the following terms.\n" +
                 "    b. If you disagree, discontinue use.\n\n" +
                 " 2. Data Consent:\n    a. By utilizing the application, you expressly grant consent for the collection, storage, and processing of personal and non-personal information.\n" +
@@ -282,95 +272,8 @@ public class Calculator_Program extends JFrame {
                 "8. Entertainment Disclaimer:\n    a. All statements and terms are for entertainment purposes only.\n" +
                 "    b. They are not real or legally binding. The Owner holds no responsibilities for the information provided herein.";
 
-
         int result = JOptionPane.showConfirmDialog(null, agreementText, "Terms and Conditions", JOptionPane.YES_NO_OPTION);
 
         return result == JOptionPane.YES_OPTION;
-    }
-
-//Main Method
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Calculator_Program calculator = new Calculator_Program();
-            calculator.setVisible(true);
-        });
-    }
-
-//Math for Calculation Function
-    private double eval(String expression) {
-        return new Object() {
-            int pos = -1, ch;
-
-            void nextChar() {
-                ch = (++pos < expression.length()) ? expression.charAt(pos) : -1;
-            }
-
-            boolean isDigit(char c) {
-                return Character.isDigit(c);
-            }
-
-            double parse() {
-                nextChar();
-                double x = parseExpression();
-                if (pos < expression.length()) throw new RuntimeException("Unexpected: " + (char) ch);
-                return x;
-            }
-
-            double parseExpression() {
-                double x = parseTerm();
-                for (; ; ) {
-                    if (eat('+')) x += parseTerm();
-                    else if (eat('-')) x -= parseTerm();
-                    else return x;
-                }
-            }
-
-            double parseTerm() {
-                double x = parseFactor();
-                for (; ; ) {
-                    if (eat('*')) x *= parseFactor();
-                    else if (eat('/')) x /= parseFactor();
-                    else return x;
-                }
-            }
-
-            double parseFactor() {
-                if (eat('+')) return parseFactor();
-                if (eat('-')) return -parseFactor();
-
-                double x;
-                int startPos = this.pos;
-                if (eat('(')) {
-                    x = parseExpression();
-                    eat(')');
-                } else if (isDigit((char) ch) || ch == '.') {
-                    while (isDigit((char) ch) || ch == '.') nextChar();
-                    x = Double.parseDouble(expression.substring(startPos, this.pos));
-                } else if (eat('√')) {
-                    x = Math.sqrt(parseFactor());
-                } else {
-                    throw new RuntimeException("Unexpected: " + (char) ch);
-                }
-
-                while (true) {
-                    startPos = this.pos;
-                    if (eat('^')) {
-                        x = Math.pow(x, parseFactor());
-                    } else {
-                        this.pos = startPos;
-                        return x;
-                    }
-                }
-            }
-
-            boolean eat(int charToEat) {
-                while (ch == ' ') nextChar();
-                if (ch == charToEat) {
-                    nextChar();
-                    return true;
-                }
-                return false;
-            }
-        }.parse();
     }
 }
